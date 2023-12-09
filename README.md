@@ -1,9 +1,13 @@
 # Extra_Credit (RSA Encryption)
 
-This code is a work in progress and is not close to the intended/desired outcome
+**Code now works as advertised with limited capabilities**
 
 This project was 1/3 extra credit assignments for CSE 310 Discrete Structures to get us to apply the use of some mathematics for a better understanding.
 - Some of the comcepts include Euclidean Algorithm and Trials Division
+
+- Be aware that currently you are only able to encrypt and decrypt 1 message at a time unless you restart the program.
+- Be aware that as of now, once you give the program a message to encrypt, the decryption proccess begins immediately
+- Be aware that there will be some useless clutter on the screen because of the nature of the assignment. (Might possibly include a feature to remove this clutter)
 
 In this assignment, we were to create an RSA Encryption Algorithm in a language of our choosing
 - This code uses c++ and two separate files, one fore the main file and the other for all of the functions
