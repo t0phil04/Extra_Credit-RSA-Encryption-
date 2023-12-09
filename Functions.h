@@ -8,6 +8,7 @@
 #include <ctime>
 #include <cmath>
 
+#define STRIDE 2
 
 using namespace std;
 
@@ -63,30 +64,6 @@ bool checkPrime(vector <int> check) {
 
 
 int mult_Inverse(int phi, int e) {
-	/*int d_decrypt = 1;
-	int tmp1 = 2;
-	int tmp2 = 2;
-	
-	
-
-	// Check if a multiplicative inverse exists
-	if (GCD != 1) {
-		cout << "Error: no multiplicative inverse exists" << endl;
-		return -1;
-	}
-
-	// Find the multiplicative inverse using a loop
-	while (tmp1 != 1) {
-		tmp1 = (e_publicKey * tmp2) % n;
-		d_decrypt = tmp2;
-		if (d_decrypt == 1) {
-			break;
-		}
-		else {
-			tmp2++;
-		}
-	}
-	*/
 
 	unsigned long prod;
 	for (size_t d = 1; d < phi; d++)
@@ -101,121 +78,108 @@ int mult_Inverse(int phi, int e) {
 	//return d_decrypt;
 }
 
-// Exponentation algorithmn
-// Comment Block below used for Learning Opportunity
-/* 
-The original code used the pow() function from the C++ standard library
-	to calculate the exponentiation of asciiValues.at(i) to the power of e.
-	However, pow() returns a floating-point value, which can lead to precision
-	errors when dealing with large numbers.
+template <class T>
+T mod_power(T x, T y, T p)
+{
+	//Source https://www.geeksforgeeks.org/modular-exponentiation-power-in-modular-arithmetic/#
+	T res = 1;
 
-In contrast, the modPow() function is a custom implementation of the
-	exponentiation algorithm that works with integers. This function
-	calculates the result of raising the base to the power of exp modulo mod.
+	x = x % p; // Update x if it is more than or
+	// equal to p
 
-The algorithm works by repeatedly squaring the base and reducing the
-	result modulo mod. This allows the calculation to be performed efficiently
-	and without the need for floating-point arithmetic.
+	if (x == 0) return 0; // In case x is divisible by p;
 
-By using modPow() instead of pow(), the precision errors are avoided,
-	and the encryption is performed correctly. This results in the correct
-	values being added to the cipher_ vector, as expected.
-*/
+	while (y > 0)
+	{
+		// If y is odd, multiply x with result
+		if (y & 1)
+			res = (res * x) % p;
 
-unsigned long long modPow(unsigned long long base, unsigned long long exp, unsigned long long mod) {
-	unsigned long long result = 1;
-	while (exp > 0) {
-		if (exp % 2 == 1) {
-			result = (result * base) % mod;
-		}
-		base = (base * base) % mod;
-		exp /= 2;
-	}
-	return result;
-}
-
-vector <unsigned long long> message_Encrypt(vector <int> asciiValues , int e, int n) {
-	// Had to switch to this data type because the outputs were all negative
-	vector <unsigned long long> cipher_;
-	for (int i = 0; i < asciiValues.size(); i++) {
-							// used to read: pow(asciiValues.at(i), e);
-							//				 encryptedValue %= n;
-							// This caused the cipher_ values to all be the same
-		unsigned long long encryptedValue = modPow(asciiValues.at(i), e, n);
-		cipher_.push_back(encryptedValue);
+		// y must be even now
+		y = y >> 1; // y = y/2
+		x = (x * x) % p;
 	}
 
-	return cipher_;
-}
-
-vector<unsigned long long> message_Decrypt(vector<unsigned long long> cipher, int d, int n) {
-	vector<unsigned long long> decrypted_ascii; // Holds the new vector of ascii values
-	cout << "\nascii to message: ";
-
-	for (int i = 0; i < cipher.size(); i++) {
-		// Use your modPow function for decryption
-		unsigned long long ascii = modPow(cipher.at(i), d, n);
-
-		decrypted_ascii.push_back(ascii);
-		cout << "ascii: " << ascii << " ";
-	}
-
-	string decrypted_message = "";
-	for (int i = 0; i < decrypted_ascii.size(); i++) {
-		decrypted_message += static_cast<char>(decrypted_ascii.at(i));
-	}
-
-	return decrypted_ascii;
+	return res;
 }
 
 
-/*
-vector<unsigned long long> message_Decrypt(vector<unsigned long long> cipher, int d, int n) {
-	vector<unsigned long long> decrypted_ascii; // Holds the new vector of ascii values
-	cout << "\nascii to message: ";
 
-	for (int i = 0; i < cipher.size(); i++) {
+template <class T>
+std::vector<T> encode_message(std::string message)
+{
+	// This function will convert the message to bits, split it according to STRIDE macro,
+	// and then place the decimal values for each of the splits into a vector. 
+	std::string binary_message;
+	std::vector<T> encoded_message;
+	int decimal;
 
-		// current index ascii value produced using modular exponentiation
-		unsigned long long ascii = pow(cipher.at(i), d);
-		ascii = ascii % n;
-
-		decrypted_ascii.push_back(ascii);
-		cout << "ascii: " << ascii << " ";
-	}
-	string decrypted_message = "";
-	for (int i = 0; i < decrypted_ascii.size(); i++) {
-		decrypted_message += static_cast<char>(decrypted_ascii.at(i));
+	// Convert each character in a string to bits, and add to a new string
+	for (size_t i = 0; i < message.size(); ++i)
+	{
+		binary_message += std::bitset<8>(message.c_str()[i]).to_string();
 	}
 
-	return decrypted_ascii;
+	// Take bit splits of size STRIDE, convert to decimal value, and add to a vector
+	for (size_t i = 0; i < binary_message.size(); i = i + STRIDE)
+	{
+		decimal = std::bitset<STRIDE>(binary_message.substr(i, STRIDE)).to_ulong();
+		encoded_message.push_back(decimal);
+	}
 
+	return encoded_message;
 }
-*/
 
-/*
-vector<unsigned long long> message_Decrypt(vector<unsigned long long> cipher, int d, int n) {
-	vector<unsigned long long> decrypted_ascii; // Holds the new vector of ascii values
-	cout << "\nascii to message: ";
+template <class T>
+std::string decode_message(std::vector<T> decrypted_message) {
+	// Essentially the reverse of encode message, takes a vector of decimal values,
+	// converts them to bits and creates a new bit string, and takes bytes from the string
+	// to convert to ASCII characters
+	std::string message, binary_message;
+	char character;
 
-	for (int i = 0; i < cipher.size(); i++) {
-
-		// current index ascii value produced using modular exponentiation
-		unsigned long long ascii = modPow(cipher.at(i), d, n);
-		decrypted_ascii.push_back(ascii);
-		cout << decrypted_ascii.at(i) << " ";
-
+	// Convert decimal values back to bits and add to binary string
+	for (T dec : decrypted_message) {
+		binary_message += std::bitset<STRIDE>(dec).to_string();
 	}
-	string decrypted_message = "";
-	for (int i = 0; i < decrypted_ascii.size(); i++) {
-		decrypted_message += static_cast<char>(decrypted_ascii.at(i));
+	// Take bytes from the binary string and convert them to ASCII character equivalent
+	for (size_t i = 0; i < binary_message.size(); i = i + 8) {
+		character = (char)std::bitset<8>(binary_message.substr(i, 8)).to_ulong();
+		message += character;
 	}
 
-	return decrypted_ascii;
-
+	return message;
 }
-*/
 
+template <typename type>
+vector<type> encrypt_message(vector<type> encoded, type e, type n)
+{
+	vector<type> cipher;
+	type c;
+
+	for (const type m : encoded)
+	{
+		c = mod_power<type>(m, e, n);
+		cipher.push_back(c);
+	}
+
+	return cipher;
+}
+
+template <typename type>
+vector<type> decrypt_message(const vector<type>& cipher, type d, type n)
+{
+	vector<type> decrypted;
+	type m;
+
+	for (const type c : cipher)
+	{
+		m = mod_power<type>(c, d, n);
+		decrypted.push_back(m);
+	}
+
+	return decrypted;
+}
 
 #endif // FUNCTIONS_H
 

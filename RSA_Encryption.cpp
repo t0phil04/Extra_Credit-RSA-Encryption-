@@ -1,71 +1,27 @@
 #include <iostream>
 #include <string>
-#include <math.h>
 #include <vector>
 #include <ctime>
+#include <cmath>
+#include <random>
+#include <bitset>
 
 
-#include "functions.h"
+#include "Functions.h"
 
-using std::cout; using std::cin; using std::vector; using std::endl; using std::string;
-
-// Functions inside functions header file
-/*
-vector <int> trialsDivision(int n);
-int EU_Algorithm(int e_publicKey_, int phi_n_);
-bool checkPrime(vector <int> check);
-int mult_Inverse( int e_publicKey, int n_KeyLength, int GCD);
-vector <unsigned long long> message_Encrypt(vector <int> asciiValues, int e, int n);
-*/
-
-int mod_power(int x, int y, int p)
-{
-	//Source https://www.geeksforgeeks.org/modular-exponentiation-power-in-modular-arithmetic/#
-	int res = 1;
-
-	x = x % p; // Update x if it is more than or
-	// equal to p
-
-	if (x == 0) return 0; // In case x is divisible by p;
-
-	while (y > 0)
-	{
-		// If y is odd, multiply x with result
-		if (y & 1)
-			res = (res * x) % p;
-
-		// y must be even now
-		y = y >> 1; // y = y/2
-		x = (x * x) % p;
-	}
-
-	return res;
-}
-
-vector<unsigned long long> fake_decrypt(const vector<unsigned long long>& cipher, int d, int n)
-{
-	vector<unsigned long long> decrypted;
-	int m;
-
-	for (const size_t c : cipher)
-	{
-		m = mod_power(c, d, n);
-		decrypted.push_back(m);
-	}
-
-	return decrypted;
-}
+//using std::cout; using std::cin; using std::vector; using std::endl; using std::string;
 
 int main() {
 	srand(time(0));
 
-	vector<int> primeFactorsP; // will hold the prime factors to p
-	vector<int> primeFactorsQ; // will hold the prime factors to q
-	//int p = rand() % 50;
+	std::vector<int> primeFactorsP; // will hold the prime factors to p
+	std::vector<int> primeFactorsQ; // will hold the prime factors to q
+	
 	int p = 7;
-	cout << "1. Trials Division" << endl;
+	int q = 13;
+	cout << "1. Trials Division" << std::endl;
 
-	cout << "Positive integer first being tested for primality (p): " << p << endl;
+	std::cout << "Positive integer first being tested for primality (p): " << p << std::endl;
 
 	// Starts method for trials division using p
 	primeFactorsP = trialsDivision(p);
@@ -75,8 +31,8 @@ int main() {
 
 	if (isPrime_P == true)
 	{
-		cout << "Final number p to be tested for Primality: " << p << endl;
-		cout << "Prime Factors to p: " << primeFactorsP.at(0) << " " << endl;
+		std::cout << "Final number p to be tested for Primality: " << p << std::endl;
+		std::cout << "Prime Factors to p: " << primeFactorsP.at(0) << " " << std::endl;
 	}
 	while (isPrime_P == false)
 	{
@@ -85,17 +41,13 @@ int main() {
 		isPrime_P = checkPrime(primeFactorsP);
 		if (isPrime_P == true)
 		{
-			cout << "Final number p to be tested for Primality: " << p << endl;
-			cout << "Prime Factors to p: " << primeFactorsP.at(0) << " " << endl;
+			std::cout << "Final number p to be tested for Primality: " << p << std::endl;
+			std::cout << "Prime Factors to p: " << primeFactorsP.at(0) << " " << std::endl;
 
 		}
 	}
 
-
-	//int q = rand() + 50;
-	int q = 13;
-
-	cout << "Positive integer first being tested for primality (q): " << q << endl;
+	std::cout << "Positive integer first being tested for primality (q): " << q << std::endl;
 
 	// Starts method for trials division using q
 	primeFactorsQ = trialsDivision(q);
@@ -112,20 +64,19 @@ int main() {
 
 		if (isPrime_Q == true && p_and_q_GCD == 1)
 		{
-			cout << "Final number q to be tested for Primality: " << q << endl;
-			cout << "Prime factors to q: " << primeFactorsQ.at(0) << " " << endl;
+			std::cout << "Final number q to be tested for Primality: " << q << std::endl;
+			std::cout << "Prime factors to q: " << primeFactorsQ.at(0) << " " << std::endl;
 		}
 	}
-	cout << "GCD(p,q): " << p_and_q_GCD << endl;
+	std::cout << "GCD(p,q): " << p_and_q_GCD << std::endl;
 
-	cout << "\n2. Euclidean Algorithm" << endl;
+	std::cout << "\n2. Euclidean Algorithm" << std::endl;
 
 	int n_KeyLength = p * q;
-	cout << "Key Length (n = p*q): " << n_KeyLength << endl;
+	std::cout << "Key Length (n = p*q): " << n_KeyLength << std::endl;
 
 	int phi_n = (p - 1) * (q - 1);
 	
-	//int e_publicKey = rand() % phi_n + 2;
 	int e_publicKey = 5;
 	if (e_publicKey == 2 || e_publicKey >= phi_n)
 	{
@@ -149,66 +100,44 @@ int main() {
 		GCD_final = EU_Algorithm(e_publicKey, phi_n);
 	}
 
-	cout << "Public Key: " << e_publicKey << endl;
-	cout << "GCD(" << e_publicKey << ',' << phi_n << ')' << endl;
+	std::cout << "Public Key: " << e_publicKey << std::endl;
+	std::cout << "GCD(" << e_publicKey << ',' << phi_n << ')' << std::endl;
 
 	
-	cout << "GCD calculated is: " << GCD_final << endl;
+	std::cout << "GCD calculated is: " << GCD_final << std::endl;
 
 	// Calculates the decryption key
 	//int d_inverse = mult_Inverse(e_publicKey, n_KeyLength, GCD_final);
 	int d_inverse = mult_Inverse(phi_n, e_publicKey);
-	cout << "Decryption Key: " << d_inverse << endl;
+	std::cout << "Decryption Key: " << d_inverse << std::endl;
 
 	// Recieves the message for Encryption
-	string plainText;
-	cout << "\nEnter a Phrase to Encrypt: "; 
+	std::string plainText;
+	std::cout << "\nEnter a Phrase to Encrypt: ";
 	getline(cin, plainText);
 	
-	// Starts the conversion to ascii
-	vector<int> asciiValues;
-	for (char c: plainText)
-	{
-		// how to cast a character to int for vectors
-		// if using array: asciiValues[i] = (int) plainText[i];
-		asciiValues.push_back(int(c));
-	}
-	cout << "\nEncoded Text: ";
-	//  (range_declaration : range_expression)
-	for (int ascii : asciiValues) { // new syntax for the loop using the vectors length
-		cout << ascii << " ";
-	}
+	
+// Start the Encryption procces
+	std::vector<unsigned long long> encoded_message = encode_message<unsigned long long>(plainText);
+	std::vector<unsigned long long> cipher = encrypt_message<unsigned long long>(encoded_message, e_publicKey, n_KeyLength);
+
+	std::cout << "\nEncoded_message: ";
+	for (int i = 0; i < encoded_message.size(); i++) { std::cout << encoded_message.at(i) << " "; }
+
+	std::cout << "\nCipher: ";
+	for (int i = 0; i < cipher.size(); i++) { std::cout <<cipher.at(i) << " "; }
+	
 
 	
-	// Start the Encryption procces
-	vector<unsigned long long> cipher = message_Encrypt(asciiValues, e_publicKey , n_KeyLength);
-	cout << "\nCipher: ";
-	for (int i = 0; i < cipher.size(); i++) { cout << cipher.at(i) << " "; }
-	
-	// Start the Decryption Procces
-	// Decrypt the cipher
+// Start the Decryption Procces
+	std::vector<unsigned long long> decrypted = decrypt_message<unsigned long long>(cipher, d_inverse, n_KeyLength);
+/*
+	cout << "\nDecrypted Message: ";
+	for (int i = 0; i < decrypted.size(); i++) { std::cout << decrypted.at(i) << " "; }
+*/
+	std::string ret_message = decode_message(decrypted);
+	std::cout << "\nOriginal Message: " << ret_message;
 
-	//vector<unsigned long long> decrypted_ascii = message_Decrypt(cipher, d_inverse, n_KeyLength);
-
-	// Convert decrypted ascii values back to characters
-	// Print out the decrypted ASCII values
-	/*
-	string decrypted_message = " ";
-	for (int i = 0; i < decrypted_ascii.size(); i++) {
-		decrypted_message += static_cast<char>(decrypted_ascii[i] % 256);
-	}
-	*/
-	vector<unsigned long long> decrypted_ascii = fake_decrypt(cipher, d_inverse, n_KeyLength);
-	
-	
-	cout << "\ndecryption: ";
-	for (size_t i = 0; i < decrypted_ascii.size(); i++)
-	{
-		cout << decrypted_ascii.at(i) << " ";
-	}	 
-
-
-	//cout << "\nDecrypted Message: " << decrypted_message;
 
 	return 0;
 }
